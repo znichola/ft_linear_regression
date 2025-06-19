@@ -1,13 +1,15 @@
 #!/bin/bash
 
-fetch_data() {
+fetch() {
     wget https://cdn.intra.42.fr/document/document/30716/data.csv
 }
 
-make_venv() {
+venv() {
     python3 -m venv .venv \
         && source .venv/bin/activate \
         && pip install --upgrade pip
+
+    echo "ℹ️ To activate the venv: run : source .venv/bin/activate"
 }
 
 usage() {

@@ -1,3 +1,4 @@
 *.swp
-data.csv
 .venv
+data.csv
+weights.txt

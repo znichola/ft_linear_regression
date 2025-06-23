@@ -1,6 +1,6 @@
 
 def estimatePrice(mileage: float, t0: float, t1: float) -> float:
-    return t0 + t1 * mileage
+    return t0 + (t1 * mileage)
 
 
 def is_number(s: str) -> bool:

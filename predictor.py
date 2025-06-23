@@ -1,5 +1,6 @@
 
 def estimatePrice(mileage: float, t0: float, t1: float) -> float:
+    '''price = t0 + (t1 * mileage)'''
     return t0 + (t1 * mileage)
 
 
@@ -29,7 +30,7 @@ def load_weights(file_path="weights.txt") -> tuple[float | None, float | None]:
 
             return float(t0_str), float(t1_str)
     except OSError:
-        print("Error: weights.txt is inaccessible.")
+        print("Error: weights.txt is inaccessible")
         return None, None
 
 
@@ -45,7 +46,7 @@ if __name__ == "__main__":
 
     mileage_input: str = input("Enter the car's mileage: ").strip()
     if not is_number(mileage_input):
-        print("Error: Mileage must be a number.")
+        print("Error: Mileage must be a number")
         exit(1)
 
     mileage: float = float(mileage_input)

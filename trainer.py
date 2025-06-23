@@ -1,17 +1,20 @@
-import numpy as np
+from typing import Optional
+import csv
 import matplotlib.pyplot as plt
 from predictor import estimatePrice
-from typing import Optional
 
 
-def loadTrainingData(file_path: str = "data.csv") -> Optional[np.ndarray]:
+def loadTrainingData(file_path: str = "data.csv") -> Optional[tuple[list[float], list[float]]]:
     try:
-        # Assumes header: km,price
-        data = np.loadtxt(file_path, delimiter=",", skiprows=1)
-        if data.shape[1] != 2:
-            print("Error: data must have two columns: mileage (km) and price")
-            return None
-        return data
+        mileageVec : list[float] = []
+        priceVec : list[float] = []
+        with open(file_path, 'r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip header
+            for row in reader:
+                mileageVec.append(float(row[0]))
+                priceVec.append(float(row[1]))
+        return mileageVec, priceVec
     except OSError:
         print(f"Error: Could not open file '{file_path}'")
         return None
@@ -20,51 +23,51 @@ def loadTrainingData(file_path: str = "data.csv") -> Optional[np.ndarray]:
         return None
 
 
-def trainModel(data: np.ndarray, learningRate: float, numIterations: int) -> (
+def normalize_data(data: list[float]):
+    min_val = min(data)
+    max_val = max(data)
+    range_val = max_val - min_val
+    
+    if range_val == 0:
+        return [0.0] * len(data), min_val, 1.0
+    normalized = [(x - min_val) / range_val for x in data]
+    return normalized, min_val, range_val
+
+
+def mse(mileageVec, priceVec, t0, t1):
+    predictionVec = [estimatePrice(mile, t0, t1) for mile in mileageVec]
+    return (1/len(mileageVec)) * sum((prediction - price) ** 2 for prediction, price in zip(predictionVec, priceVec))
+
+def trainModel(mileageVec: list[float], priceVec: list[float], numIterations: int) -> (
         tuple[float, float]):
     t0 = 0.0 # weight
     t1 = 0.0 # bias
-    m = len(data)
+    m = len(mileageVec)
 
-    mileageVec = data[:, 0] * 0.0001
-    priceVec = data[:, 1] * 0.001
+    mileageVec, mileage_min, mileage_range = normalize_data(mileageVec) 
+    priceVec, price_min, price_range = normalize_data(priceVec) 
 
     print("millage:", mileageVec)
     print("price:", priceVec)
 
-    print("price min", np.min(priceVec), "max", np.max(priceVec))
-    print("milage min", np.min(mileageVec), "max", np.max(mileageVec))
-
-    for i in range(5):
-        predictionsVec = estimatePrice(mileageVec, t0, t1)
-        print("predictions:", predictionsVec)
-
-        errorsVec = predictionsVec - priceVec
-        print("error:", errorsVec)
-
-        t0 -= learningRate * (1/m) * np.sum(errorsVec)
-        t1 += learningRate * (1/m) * np.sum(errorsVec * mileageVec)
-
-        print("scalled errros:", errorsVec * mileageVec)
-        print(t0, t1)
-
-    return t0, t1
+    print("price min", min(priceVec), "max", max(priceVec))
+    print("milage min", min(mileageVec), "max", max(mileageVec))
 
     for i in range(numIterations):
-        predictionsVec = estimatePrice(mileageVec, t0, t1)
-        errorsVec = predictionsVec - priceVec
+        predictionsVec = [estimatePrice(mileage, t0, t1) for mileage in mileageVec]
+        errorsVec = [prediciton - price for prediciton, price in zip(predictionsVec, priceVec)]
 
-        gradient_t0 = (1 / m) * np.sum(errorsVec)
-        gradient_t1 = (1 / m) * np.sum(errorsVec * mileageVec)
+        t0 -= learningRate * (1/m) * sum(errorsVec)
+        t1 -= learningRate * (1/m) * sum(error * mileage for error, mileage in zip(errorsVec, mileageVec))
 
-        t0 -= learningRate * gradient_t0
-        t1 -= learningRate * gradient_t1
-
-        if not np.isfinite(t0) or not np.isfinite(t1):
-            print(f"Warning: Non-finite weights at iteration {i}, early exit")
-            break
-
-    return t0, t1
+    final_t0 = price_min + price_range * t0 - price_range * t1 * mileage_min / mileage_range
+    final_t1 = price_range * t1 / mileage_range
+    
+    print(f"\nFinal parameters:")
+    print(f"t0 = {final_t0:.6f}")
+    print(f"t1 = {final_t1:.6f}")
+    
+    return final_t0, final_t1
 
 
 def saveWeightsToFile(file_path: str, weights: tuple[float, float]) -> None:
@@ -76,12 +79,12 @@ def saveWeightsToFile(file_path: str, weights: tuple[float, float]) -> None:
         print(f"Error: Could not save weights to '{file_path}'")
 
 
-def plotData(data: np.ndarray, weights: Optional[tuple[float, float]] = None) -> None:
-    plt.scatter(data[:, 0], data[:, 1], label="Training data", color="blue")
+def plotData(mileageVec: list[float], priceVec: list[float], weights: Optional[tuple[float, float]] = None) -> None:
+    plt.scatter(mileageVec, priceVec, label="Training data", color="blue")
 
     if weights is not None:
-        x_vals = np.linspace(data[:, 0].min(), data[:, 0].max(), 100)
-        y_vals = estimatePrice(x_vals, weights[0], weights[1])
+        x_vals = mileageVec
+        y_vals = [estimatePrice(x, weights[0], weights[1]) for x in x_vals]
         plt.plot(x_vals, y_vals, color="red", label="Regression line")
 
     plt.xlabel("Mileage (km)")
@@ -99,20 +102,27 @@ if __name__ == "__main__":
     data = loadTrainingData()
     if data is None:
         exit(1)
+    
+    if  len(data[0]) <= 0 or len(data[1]) <= 0:
+        print("Data length is not greater than 0")
+        exit(1)
+
+    mileageVec = data[0]
+    priceVec = data[1]
 
     # Plot data
     #plotData(data)
 
-    learningRate = 0.0001
-    numIterations = 1000
+    learningRate = 0.1
+    numIterations = 2000
 
     # Train modle
-    weights = trainModel(data, learningRate, numIterations)
+    weights = trainModel(mileageVec, priceVec, numIterations)
     print(f"Trained weights: t0 = {weights[0]:.4f}, t1 = {weights[1]:.8f}")
 
     # Save to file
     saveWeightsToFile("weights.txt", weights)
 
     # Plot result
-    plotData(data, weights)
+    plotData(mileageVec, priceVec, weights)
 

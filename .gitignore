@@ -1,5 +1,7 @@
+.vscode
 *.swp
 .venv
 __pycache__
 data.csv
 weights.txt
+dump.py

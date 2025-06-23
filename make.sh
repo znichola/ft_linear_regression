@@ -7,7 +7,8 @@ fetch() {
 venv() {
     python3 -m venv .venv \
         && source .venv/bin/activate \
-        && pip install --upgrade pip
+        && pip install --upgrade pip \
+        && pip install -r requirements.txt
 
     echo "ℹ️ To activate the venv: run : source .venv/bin/activate"
 }

@@ -51,4 +51,4 @@ if __name__ == "__main__":
 
     mileage: float = float(mileage_input)
     estimated_price: float = estimatePrice(mileage, t0, t1)
-    print(f"Estimated car at {mileage}km: {estimated_price:.2f}")
+    print(f"Price estimate for a car at {mileage}km: {estimated_price:.2f}")

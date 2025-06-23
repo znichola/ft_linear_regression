@@ -6,8 +6,8 @@ from predictor import estimatePrice
 
 def loadTrainingData(file_path: str = "data.csv") -> Optional[tuple[list[float], list[float]]]:
     try:
-        mileageVec : list[float] = []
-        priceVec : list[float] = []
+        mileageVec: list[float] = []
+        priceVec: list[float] = []
         with open(file_path, 'r') as file:
             reader = csv.reader(file)
             next(reader)  # Skip header
@@ -27,7 +27,7 @@ def normalize_data(data: list[float]):
     min_val = min(data)
     max_val = max(data)
     range_val = max_val - min_val
-    
+
     if range_val == 0:
         return [0.0] * len(data), min_val, 1.0
     normalized = [(x - min_val) / range_val for x in data]
@@ -38,35 +38,31 @@ def mse(mileageVec, priceVec, t0, t1):
     predictionVec = [estimatePrice(mile, t0, t1) for mile in mileageVec]
     return (1/len(mileageVec)) * sum((prediction - price) ** 2 for prediction, price in zip(predictionVec, priceVec))
 
+
 def trainModel(mileageVec: list[float], priceVec: list[float], numIterations: int) -> (
         tuple[float, float]):
-    t0 = 0.0 # weight
-    t1 = 0.0 # bias
+    t0 = 0.0  # weight
+    t1 = 0.0  # bias
     m = len(mileageVec)
 
-    mileageVec, mileage_min, mileage_range = normalize_data(mileageVec) 
-    priceVec, price_min, price_range = normalize_data(priceVec) 
-
-    print("millage:", mileageVec)
-    print("price:", priceVec)
-
-    print("price min", min(priceVec), "max", max(priceVec))
-    print("milage min", min(mileageVec), "max", max(mileageVec))
+    mileageVec, mileage_min, mileage_range = normalize_data(mileageVec)
+    priceVec, price_min, price_range = normalize_data(priceVec)
 
     for i in range(numIterations):
-        predictionsVec = [estimatePrice(mileage, t0, t1) for mileage in mileageVec]
-        errorsVec = [prediciton - price for prediciton, price in zip(predictionsVec, priceVec)]
+        predictionsVec = [estimatePrice(mileage, t0, t1)
+                          for mileage in mileageVec]
+        errorsVec = [prediciton - price for prediciton,
+                     price in zip(predictionsVec, priceVec)]
 
         t0 -= learningRate * (1/m) * sum(errorsVec)
-        t1 -= learningRate * (1/m) * sum(error * mileage for error, mileage in zip(errorsVec, mileageVec))
+        t1 -= learningRate * \
+            (1/m) * sum(error * mileage for error,
+                        mileage in zip(errorsVec, mileageVec))
 
-    final_t0 = price_min + price_range * t0 - price_range * t1 * mileage_min / mileage_range
+    final_t0 = price_min + price_range * t0 - \
+        price_range * t1 * mileage_min / mileage_range
     final_t1 = price_range * t1 / mileage_range
-    
-    print(f"\nFinal parameters:")
-    print(f"t0 = {final_t0:.6f}")
-    print(f"t1 = {final_t1:.6f}")
-    
+
     return final_t0, final_t1
 
 
@@ -102,8 +98,8 @@ if __name__ == "__main__":
     data = loadTrainingData()
     if data is None:
         exit(1)
-    
-    if  len(data[0]) <= 0 or len(data[1]) <= 0:
+
+    if len(data[0]) <= 0 or len(data[1]) <= 0:
         print("Data length is not greater than 0")
         exit(1)
 
@@ -111,18 +107,17 @@ if __name__ == "__main__":
     priceVec = data[1]
 
     # Plot data
-    #plotData(data)
+    # plotData(data)
 
     learningRate = 0.1
     numIterations = 2000
 
     # Train modle
     weights = trainModel(mileageVec, priceVec, numIterations)
-    print(f"Trained weights: t0 = {weights[0]:.4f}, t1 = {weights[1]:.8f}")
+    print(f"Trained weights: t0 = {weights[0]:.4f}, t1 = {weights[1]:.4f}")
 
     # Save to file
     saveWeightsToFile("weights.txt", weights)
 
     # Plot result
     plotData(mileageVec, priceVec, weights)
-

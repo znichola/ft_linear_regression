@@ -5,6 +5,9 @@ An introduction to machine learning.
 > For this project, you will have to create a program that predicts the price
 of a car by using a linear function train with a gradient descent algorithm
 
+The google dev [ML concepts](https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent)
+is a great resource.
+
 ## Predictor program
 
 ```
@@ -40,4 +43,10 @@ t1 = learningRate * averageWeightedError
 _weighted by millage (the single feature in this case)_
 
 This scales the eror by how much impact the millage will have on it.
+
+## judge program
+
+A program that calculates the precision of the algorithm, for the bonus. I will
+use the [mean squared error](https://en.wikipedia.org/wiki/Mean_squared_error)
+for this.
 

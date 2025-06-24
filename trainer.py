@@ -34,11 +34,6 @@ def normalize_data(data: list[float]):
     return normalized, min_val, range_val
 
 
-def mse(mileageVec, priceVec, t0, t1):
-    predictionVec = [estimatePrice(mile, t0, t1) for mile in mileageVec]
-    return (1/len(mileageVec)) * sum((prediction - price) ** 2 for prediction, price in zip(predictionVec, priceVec))
-
-
 def trainModel(mileageVec: list[float], priceVec: list[float], numIterations: int) -> (
         tuple[float, float]):
     t0 = 0.0  # weight
@@ -95,19 +90,13 @@ if __name__ == "__main__":
     print("Let's train the model to predict the right price")
     print()
 
-    data = loadTrainingData()
-    if data is None:
+    mileageVec, priceVec = loadTrainingData()
+    if mileageVec is None or priceVec is None:
         exit(1)
 
-    if len(data[0]) <= 0 or len(data[1]) <= 0:
-        print("Data length is not greater than 0")
+    if len(mileageVec) <= 0 or len(priceVec) <= 0:
+        print("Error: Data length is not greater than 0")
         exit(1)
-
-    mileageVec = data[0]
-    priceVec = data[1]
-
-    # Plot data
-    # plotData(data)
 
     learningRate = 0.1
     numIterations = 2000

@@ -1,4 +1,3 @@
-
 def estimatePrice(mileage: float, t0: float, t1: float) -> float:
     '''price = t0 + (t1 * mileage)'''
     return t0 + (t1 * mileage)
@@ -12,7 +11,7 @@ def is_number(s: str) -> bool:
         return False
 
 
-def load_weights(file_path="weights.txt") -> tuple[float | None, float | None]:
+def loadWeights(file_path="weights.txt") -> tuple[float | None, float | None]:
     try:
         with open(file_path, "r") as file:
             lines: list[str] = file.readlines()
@@ -40,7 +39,7 @@ if __name__ == "__main__":
 
     t0: float | None
     t1: float | None
-    t0, t1 = load_weights()
+    t0, t1 = loadWeights()
     if t0 is None or t1 is None:
         exit(1)
 
@@ -51,4 +50,4 @@ if __name__ == "__main__":
 
     mileage: float = float(mileage_input)
     estimated_price: float = estimatePrice(mileage, t0, t1)
-    print(f"Price estimate for a car at {mileage}km: {estimated_price:.2f}")
+    print(f"Price estimate for a car at {mileage}km is €{estimated_price:.2f}")

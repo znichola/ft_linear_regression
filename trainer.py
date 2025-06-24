@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from predictor import estimatePrice
 
 
-def loadTrainingData(file_path: str = "data.csv") -> Optional[tuple[list[float], list[float]]]:
+def loadTrainingData(file_path: str = "data.csv") -> tuple[Optional[list[float]], Optional[list[float]]]:
     try:
         mileageVec: list[float] = []
         priceVec: list[float] = []
@@ -17,10 +17,10 @@ def loadTrainingData(file_path: str = "data.csv") -> Optional[tuple[list[float],
         return mileageVec, priceVec
     except OSError:
         print(f"Error: Could not open file '{file_path}'")
-        return None
+        return None, None
     except ValueError:
         print("Error: File contents are not valid numbers")
-        return None
+        return None, None
 
 
 def normalize_data(data: list[float]):
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     learningRate = 0.1
     numIterations = 2000
 
-    # Train modle
+    # Train model
     weights = trainModel(mileageVec, priceVec, numIterations)
     print(f"Trained weights: t0 = {weights[0]:.4f}, t1 = {weights[1]:.4f}")
 

@@ -2,7 +2,7 @@ from predictor import loadWeights, estimatePrice
 from trainer import loadTrainingData
 
 
-def meanSquaredError(mileageVec, priceVec, t0, t1):
+def meanSquaredError(mileageVec: list[float], priceVec: list[float], t0: float, t1: float) -> float:
     predictionVec = [estimatePrice(mile, t0, t1) for mile in mileageVec]
     return (1/len(mileageVec)) * sum((prediction - price) ** 2 for prediction, price in zip(predictionVec, priceVec))
 

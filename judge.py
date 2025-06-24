@@ -13,7 +13,6 @@ if __name__ == "__main__":
 
     t0, t1 = loadWeights()
     if t0 is None or t1 is None:
-        print(f"Error: Could not open weights from 'weights.txt'")
         exit(1)
 
     mileageVec, priceVec = loadTrainingData()
